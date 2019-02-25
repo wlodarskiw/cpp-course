@@ -1,4 +1,4 @@
-# Added by me
+# Added by me so that only cpp file will be included
 *.sln
 *.filters
 *.vcxproj

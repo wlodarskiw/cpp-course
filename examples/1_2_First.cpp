@@ -3,6 +3,6 @@
 #include <conio.h>
 void main()
 {
-	std::cout << "Hurra! Napisalem pierwszy program w C++!" << std::endl;
+	std::cout << "Hello world!" << std::endl;
 	_getch();
 }
