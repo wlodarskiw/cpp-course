@@ -1,4 +1,5 @@
 // Do - pierwsza pêtla warunkowa
+// Break - przerwanie pêtli
 
 #include <iostream>
 #include <conio.h>
@@ -9,10 +10,13 @@ void main()
 
 	do
 	{
-		std::cout << "Wprowadz liczbe wieksza od 10: ";
+		std::cout << "Wprowadz liczbe wieksza od 10" << std::endl;
+		std::cout << "lub zero, by zakonczyc program: ";
 		std::cin >> nLiczba;
+		
+		if (nLiczba == 0) break;
 	} while (nLiczba <= 10);
 
-	std::cout << "Dziekuje za wspolprace :)";
+	std::cout << "Nacisnij dowolny klawisz.";
 	_getch();
 }
