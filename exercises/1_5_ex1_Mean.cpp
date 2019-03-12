@@ -1,14 +1,13 @@
 // Mean - program licz¹cy œredni¹ arytmetyczn¹
 
 /* wykonano trudniejszy wariant,
-uzytkownik wprowadza liczby az do wpisania znaku 'x' */
+uzytkownik wprowadza liczby az do wpisania innego znaku */
 
 /* wynonano bardzo trudny wariant zadania,
 nie wykorzystujac do liczenia tak prostej rzeczy tablicy */
 
 #include <iostream>
 #include <conio.h>
-#include <string>
 
 void main()
 {
@@ -18,25 +17,18 @@ void main()
 
 	std::cout << "Podaj kolejne liczby do obliczenia sredniej arytmetycznej";
 	std::cout << std::endl;
-	std::cout << "Aby zakonczyc wpisz 'x'." << std::endl;
+	std::cout << "Aby zakonczyc wpisz inny znak niz liczba." << std::endl;
 
 	unsigned uIlosc = 0; // zmienna przechowuj¹ca iloœæ liczb
 	float fSuma = 0.0; // zmienna przechowuj¹ca sumê liczb
-	std::string sInput = ""; // zmienna pomocnicza do wprowadzania liczb
+	float fInput = 0.0; // zmienna przechowuj¹ca co wprowadzi³ u¿ytkownik
 
-	for (;;)
+	std::cout << "Podaj liczbe: ";
+	while (std::cin >> fInput)
 	{
 		std::cout << "Podaj liczbe: ";
-		std::cin >> sInput;
-
-		if (sInput == "x") break;
-		// warunek przerywajacy petle jezeli uzytkownik wprowadzil 'x'
-		else
-		{
-			// wprowadzanie liczb do tabeli i zliczanie ich sumy
-			fSuma += std::stof(sInput);
-			++uIlosc;
-		}
+		fSuma += fInput;
+		++uIlosc;
 	}
 	// wyswietlanie wyniku
 	std::cout << "Srednia wynosi: " << fSuma << "/" << uIlosc << "=";
