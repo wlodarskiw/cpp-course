@@ -2,16 +2,13 @@
 
 #include <iostream>
 #include <ctime>
-#include <string>
 #include "game.h"
 
 // zmienne
 //------------------------------------------------------------------------------
 
 // plansza w postaci tablicy 3x3
-FIELD g_aPlansza[3][3] = { { FLD_EMPTY, FLD_EMPTY, FLD_EMPTY },
-						   { FLD_EMPTY, FLD_EMPTY, FLD_EMPTY },
-						   { FLD_EMPTY, FLD_EMPTY, FLD_EMPTY } };
+FIELD g_aPlansza[uRozmiar][uRozmiar];
 
 // stan gry (nie rozpoczêta, ruch gracza, wygrana lub remis)
 GAMESTATE g_StanGry = GS_NOTSTARTED;
@@ -28,6 +25,15 @@ bool StartGry()
 	// najpierw sprawdzamy, czy gra ju¿ nie trwa;
 	// je¿eli tak, to funkcja koñczy siê pora¿k¹
 	if (g_StanGry != GS_NOTSTARTED) return false;
+
+	// "wyzerowanie" planszy
+	for (int i = 0; i < uRozmiar; ++i)
+	{
+		for (int j = 0; j < uRozmiar; ++j)
+		{
+			g_aPlansza[i][j] = FLD_EMPTY;
+		}
+	}
 
 	// losujemy gracza, który bêdzie zaczyna³
 	srand(static_cast<unsigned>(time(NULL)));
@@ -55,31 +61,45 @@ bool RysujPlansze()
 	std::cout << std::endl;
 
 	// nastêpnie wypisujemy w³aœciw¹ planszê przy pomocy dwóch pêtli for
-	std::cout << "        ---------" << std::endl;
-	for (int i = 0; i < 3; ++i)
+	// górna czêœæ ramki
+	std::cout << "     ";
+	for (int i = 0; i < uRozmiar * 2 + 3; ++i)
+		std::cout << "-";
+	std::cout << std::endl;
+
+	// kolumna
+	for (int i = 0; i < uRozmiar; ++i)
 	{
 		// lewa czêœæ ramki
-		std::cout << "        | ";
+		std::cout << "     | ";
 
 		// wiersz
-		for (int j = 0; j < 3; ++j)
+		for (int j = 0; j < uRozmiar; ++j)
 		{
 			// sprawdzamy, czy dane pole jest puste
 			if (g_aPlansza[i][j] == FLD_EMPTY)
+			{
 				/* wtedy wyœwietlamy jego numerek tak,
 				¿eby u¿ytkownik wiedzia³, jak¹ liczbê wpisaæ, gdy bêdzie chcia³
 				postawiæ na nim kó³ko lub krzy¿yk */
-				std::cout << i * 3 + j + 1 << " ";
+				std::cout << i * uRozmiar + j + 1 << " ";
+			}
 			else
+			{
 				/* je¿eli natomiast pole jest zajête,
 				wyœwietlamy odpowiadaj¹cy mu znak */
 				std::cout << static_cast<char>(g_aPlansza[i][j]) << " ";
+			}
 		}
 
 		// prawa czêœæ ramki
 		std::cout << "|" << std::endl;
 	}
-	std::cout << "        ---------" << std::endl;
+	// dolna czêœæ ramki
+	std::cout << "     ";
+	for (int i = 0; i < uRozmiar * 2 + 3; ++i)
+		std::cout << "-";
+	std::cout << std::endl;
 	std::cout << std::endl;
 
 	/* wreszcie, pokazujemy dolny komunikat
@@ -118,18 +138,20 @@ bool Ruch(unsigned uNumerPola)
 	// sprawdzanie stanu gry
 	if (g_StanGry != GS_MOVE) return false;
 
-	// sprawdzamy, czy numer podane pola mieœci siê w przedziale <1=49; 9=57>
-	// s¹ to wartoœci po castowaniu char na unsigned
-	if (!(uNumerPola >= 49 && uNumerPola <= 57)) return false;
+	/* sprawdzamy, czy numer podane pola mieœci siê w przedziale <1=49; 9=57>
+	s¹ to wartoœci po castowaniu char na unsigned, powstrzymuje to te¿
+	u¿ytkownika przed wprowadzeniem litery b¹dŸ innego znaku */
+	if (!(uNumerPola >= 49 && uNumerPola <= (48 + uRozmiar * uRozmiar))) 
+		return false;
 
-	// aby przywróciæ wartoœci zmiennej sprzed modyfikacji nale¿y odj¹æ 48
+	// zmieniamy zakres zmiennej na <1; 9>
 	uNumerPola -= 48;
 
 	/* jeœli doszliœmy dot¹d, to wszystko jest w porz¹dku i mo¿emy wykonaæ ruch 
 	przeliczamy wiêc numer pola na indeksy tablicy i przypisujemy znak gracza
 	(tylko wtedy, gdy pole jest puste) */
-	unsigned uY = (uNumerPola - 1) / 3;
-	unsigned uX = (uNumerPola - 1) % 3;
+	unsigned uY = (uNumerPola - 1) / uRozmiar;
+	unsigned uX = (uNumerPola - 1) % uRozmiar;
 	if (g_aPlansza[uY][uX] == FLD_EMPTY)
 		// wstaw znak aktualnego gracza w podanym polu
 		g_aPlansza[uY][uX] = static_cast<FIELD>(g_AktualnyGracz);
@@ -138,18 +160,46 @@ bool Ruch(unsigned uNumerPola)
 		return false;
 
 	// tablica przegl¹dowa wszystkich wygrywaj¹cych zestawów pól
-	const int LINIE[][3][2] = { { { 0, 0 }, { 0, 1 }, { 0, 2 } },// g. pozioma
-							    { { 1, 0 }, { 1, 1 }, { 1, 2 } },// œrod. pozioma
-							    { { 2, 0 }, { 2, 1 }, { 2, 2 } },// dolna pozioma
-							    { { 0, 0 }, { 1, 0 }, { 2, 0 } },// lewa pionowa
-							    { { 0, 1 }, { 1, 1 }, { 2, 1 } },// œrod. pionowa
-							    { { 0, 2 }, { 1, 2 }, { 2, 2 } },// prawa pionowa
-							    { { 0, 0 }, { 1, 1 }, { 2, 2 } },// backslashowa
-							    { { 2, 0 }, { 1, 1 }, { 0, 2 } } };// slashowa
+	// generujemy j¹ przy pomocy dwóch pêtli for i warunków
+	int LINIE[uRozmiar * 2 + 2][uRozmiar][2];
 
+	// kolumny
+	for (int i = 0; i < uRozmiar; ++i)
+	{
+		// wiersze
+		for (int j = 0; j < uRozmiar * 2 + 2; ++j)
+		{
+			// poziome linie
+			if (j < uRozmiar)
+			{
+				LINIE[j][i][0] = j;
+				LINIE[j][i][1] = i;
+			}
+			// pionowe linie
+			else if (j < uRozmiar * 2)
+			{
+				LINIE[j][i][0] = i;
+				LINIE[j][i][1] = j % uRozmiar;
+			}
+			// przek¹tna backslashowa
+			else if (j == uRozmiar * 2)
+			{
+				LINIE[j][i][0] = i;
+				LINIE[j][i][1] = i;
+			}
+			// przek¹tna slashowa
+			else
+			{
+				LINIE[j][i][0] = uRozmiar - 1 - i;
+				LINIE[j][i][1] = i;
+			}
+		}
+	}
+
+	// sprawdzanie czy u¿ytkownik u³o¿y³ liniê
 	FIELD Pole, ZgodnePole;
 	unsigned uLiczbaZgodnychPol;
-	for (int i = 0; i < 8; ++i)
+	for (int i = 0; i < uRozmiar * 2 + 2; ++i)
 	{
 		// i przebiega po kolejnych mo¿liwych liniach (jest ich osiem)
 
@@ -157,7 +207,7 @@ bool Ruch(unsigned uNumerPola)
 		Pole = ZgodnePole = FLD_EMPTY; // obie zmienne == FLD_EMPTY
 		uLiczbaZgodnychPol = 0;
 
-		for (int j = 0; j < 3; ++j)
+		for (int j = 0; j < uRozmiar; ++j)
 		{
 			// j przebiega po trzech polach w ka¿dej linii
 
@@ -178,7 +228,7 @@ bool Ruch(unsigned uNumerPola)
 		}
 
 		// teraz sprawdzamy, czy uda³o nam siê zgodziæ linie
-		if (uLiczbaZgodnychPol == 3 && ZgodnePole != FLD_EMPTY)
+		if (uLiczbaZgodnychPol == uRozmiar && ZgodnePole != FLD_EMPTY)
 		{
 			// je¿eli tak, ustawiamy stan gry na wygran¹
 			g_StanGry = GS_WON;
@@ -193,11 +243,11 @@ bool Ruch(unsigned uNumerPola)
 	sprawdzamy to przy pomocy odpowiedniej pêtli, zliczaj¹cej zape³nione pola 
 	je¿eli jest ich tyle, ile wszystkich mo¿liwych pól, koñczymy remisem */
 	unsigned uLiczbaZapelnionychPol = 0;
-	for (int i = 0; i < 3; ++i)
-		for (int j = 0; j < 3; ++j)
+	for (int i = 0; i < uRozmiar; ++i)
+		for (int j = 0; j < uRozmiar; ++j)
 			if (g_aPlansza[i][j] != FLD_EMPTY)
 				++uLiczbaZapelnionychPol;
-	if (uLiczbaZapelnionychPol == 3 * 3)
+	if (uLiczbaZapelnionychPol == uRozmiar * uRozmiar)
 	{
 		// ustawiamy stan gry na remis
 		g_StanGry = GS_DRAW;

@@ -29,6 +29,9 @@ enum GAMESTATE { GS_NOTSTARTED,	// nie rozpoczêta
 // stan gry
 extern GAMESTATE g_StanGry;
 
+// rozmiar planszy
+const unsigned uRozmiar = 3;
+
 // prototypy funkcji
 //------------------------------------------------------------------------------
 

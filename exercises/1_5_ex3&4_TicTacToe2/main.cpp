@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <conio.h>
-#include <string>
 #include "game.h"
 
 void main()
